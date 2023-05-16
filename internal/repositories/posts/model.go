@@ -3,12 +3,12 @@ package posts
 import "github.com/DarkhanShakhan/forum-moderation/internal/domain/entity"
 
 type model struct {
-	ID            uint64
+	ID            int64
 	Title         string
-	AuthorID      uint64
+	AuthorID      int64
 	Content       string
-	LikesCount    uint64
-	DislikesCount uint64
+	LikesCount    int64
+	DislikesCount int64
 }
 
 func (m *model) convert() *entity.Post {

@@ -3,6 +3,7 @@ package posts
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/DarkhanShakhan/forum-moderation/internal/domain/entity"
 	"github.com/DarkhanShakhan/forum-moderation/internal/domain/enum"
@@ -10,13 +11,13 @@ import (
 )
 
 type Repository interface {
-	GetPostByID(ctx context.Context, id uint64) (*entity.Post, error)
+	GetPostByID(ctx context.Context, id int64) (*entity.Post, error)
 	GetPosts(ctx context.Context) ([]*entity.Post, error)
-	GetPostsByCategory(ctx context.Context, categoryID uint64) ([]*entity.Post, error)
-	GetPostsByAuthorID(ctx context.Context, authorID uint64) ([]*entity.Post, error)
-	CreatePost(ctx context.Context, post *entity.Post) (uint64, error)
+	GetPostsByCategory(ctx context.Context, categoryID int64) ([]*entity.Post, error)
+	GetPostsByAuthorID(ctx context.Context, authorID int64) ([]*entity.Post, error)
+	CreatePost(ctx context.Context, post *entity.Post) (int64, error)
 	UpdatePost(ctx context.Context, post *entity.Post) error
-	DeletePost(ctx context.Context, id uint64) error
+	DeletePost(ctx context.Context, id int64, deleteCategory enum.ReportCategory, deleteMessage string) error
 }
 
 type repository struct {
@@ -27,7 +28,7 @@ func New(db *sql.DB) Repository {
 	return &repository{db: db}
 }
 
-func (r *repository) GetPostByID(ctx context.Context, id uint64) (*entity.Post, error) {
+func (r *repository) GetPostByID(ctx context.Context, id int64) (*entity.Post, error) {
 	var m model
 	rows, err := r.db.QueryContext(ctx, getPostByIDStmt, id)
 	if err != nil {
@@ -51,13 +52,13 @@ func (r *repository) GetPosts(ctx context.Context) ([]*entity.Post, error) {
 	}
 	for rows.Next() {
 		rows.Scan(&m.ID, &m.Title, &m.Content, &m.AuthorID, &m.LikesCount, &m.DislikesCount)
-		mm = append(mm, m)
+		mm = append(mm, &m)
 	}
 
 	return mm.convert(), nil
 }
 
-func (r *repository) GetPostsByCategory(ctx context.Context, categoryID uint64) ([]*entity.Post, error) {
+func (r *repository) GetPostsByCategory(ctx context.Context, categoryID int64) ([]*entity.Post, error) {
 	var (
 		mm models
 		m  model
@@ -68,25 +69,53 @@ func (r *repository) GetPostsByCategory(ctx context.Context, categoryID uint64) 
 	}
 	for rows.Next() {
 		rows.Scan(&m.ID, &m.Title, &m.Content, &m.AuthorID, &m.LikesCount, &m.DislikesCount)
-		mm = append(mm, m)
+		mm = append(mm, &m)
 	}
 
 	return mm.convert(), nil
 }
 
-func (r *repository) GetPostsByAuthorID(ctx context.Context, authorID uint64) ([]*entity.Post, error) {
-	return nil, nil
+func (r *repository) GetPostsByAuthorID(ctx context.Context, authorID int64) ([]*entity.Post, error) {
+	var (
+		mm models
+		m  model
+	)
+	rows, err := r.db.QueryContext(ctx, getPostsByAuthorIDStmt, authorID)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		rows.Scan(&m.ID, &m.Title, &m.Content, &m.AuthorID, &m.LikesCount, &m.DislikesCount)
+		mm = append(mm, &m)
+	}
+
+	return mm.convert(), nil
 }
 
-func (r *repository) CreatePost(ctx context.Context, post *entity.Post) (uint64, error) {
-	return 0, nil
+func (r *repository) CreatePost(ctx context.Context, post *entity.Post) (int64, error) {
+	res, err := r.db.ExecContext(ctx, createPostStmt, post.Title, post.Content, post.AuthorID, time.Now())
+	if err != nil {
+		return 0, err
+	}
+	return res.LastInsertId()
 }
 
 func (r *repository) UpdatePost(ctx context.Context, post *entity.Post) error {
 	return nil
 }
 
-func (r *repository) DeletePost(ctx context.Context, id uint64, deleteCategory enum.ReportCategory, deleteMessage string) error {
+func (r *repository) DeletePost(ctx context.Context, id int64, deleteCategory enum.ReportCategory, deleteMessage string) error {
+	res, err := r.db.ExecContext(ctx, deletePostStmt, time.Now(), deleteMessage, deleteCategory, id)
+	if err != nil {
+		return err
+	}
+	rAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rAffected == 0 {
+		return errors.ErrPostNotFound
+	}
 	return nil
 }
 

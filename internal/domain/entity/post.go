@@ -1,11 +1,11 @@
 package entity
 
 type Post struct {
-	ID            uint64
+	ID            int64
 	Title         string
-	AuthorID      uint64
-	Categories    []Category
+	AuthorID      int64
+	Categories    []*Category
 	Content       string
-	LikesCount    uint64
-	DislikesCount uint64
+	LikesCount    int64
+	DislikesCount int64
 }
