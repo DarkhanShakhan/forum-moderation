@@ -10,19 +10,28 @@ import (
 	errgroup "github.com/DarkhanShakhan/forum-moderation/internal/util"
 )
 
-type Service struct {
+type Service interface {
+	GetPostByID(ctx context.Context, id int64) (*entity.Post, error)
+	GetPosts(ctx context.Context) ([]*entity.Post, error)
+	GetPostsByAuthorID(ctx context.Context, authorID int64) ([]*entity.Post, error)
+	GetPostsByCategory(ctx context.Context, categoryID int64) ([]*entity.Post, error)
+	CreatePost(ctx context.Context, post *entity.Post) (int64, error)
+	DeletePost(ctx context.Context, id int64, deleteCategory enum.ReportCategory, deleteMessage string) error
+}
+
+type service struct {
 	postsRepository      posts.Repository
 	categoriesRepository categories.Repository
 }
 
-func New(postsRepository posts.Repository, categoriesRepository categories.Repository) *Service {
-	return &Service{
+func New(postsRepository posts.Repository, categoriesRepository categories.Repository) Service {
+	return &service{
 		postsRepository:      postsRepository,
 		categoriesRepository: categoriesRepository,
 	}
 }
 
-func (s *Service) GetPostByID(ctx context.Context, id int64) (*entity.Post, error) {
+func (s *service) GetPostByID(ctx context.Context, id int64) (*entity.Post, error) {
 	var (
 		post *entity.Post
 		cats []*entity.Category
@@ -46,7 +55,7 @@ func (s *Service) GetPostByID(ctx context.Context, id int64) (*entity.Post, erro
 	return post, nil
 }
 
-func (s *Service) GetPosts(ctx context.Context) ([]*entity.Post, error) {
+func (s *service) GetPosts(ctx context.Context) ([]*entity.Post, error) {
 	posts, err := s.postsRepository.GetPosts(ctx)
 	if err != nil {
 		return nil, err
@@ -54,7 +63,7 @@ func (s *Service) GetPosts(ctx context.Context) ([]*entity.Post, error) {
 	return s.mergeCategories(ctx, posts)
 }
 
-func (s *Service) GetPostsByAuthorID(ctx context.Context, authorID int64) ([]*entity.Post, error) {
+func (s *service) GetPostsByAuthorID(ctx context.Context, authorID int64) ([]*entity.Post, error) {
 	posts, err := s.postsRepository.GetPostsByAuthorID(ctx, authorID)
 	if err != nil {
 		return nil, err
@@ -62,7 +71,7 @@ func (s *Service) GetPostsByAuthorID(ctx context.Context, authorID int64) ([]*en
 	return s.mergeCategories(ctx, posts)
 }
 
-func (s *Service) GetPostsByCategory(ctx context.Context, categoryID int64) ([]*entity.Post, error) {
+func (s *service) GetPostsByCategory(ctx context.Context, categoryID int64) ([]*entity.Post, error) {
 	posts, err := s.postsRepository.GetPostsByCategory(ctx, categoryID)
 	if err != nil {
 		return nil, err
@@ -70,15 +79,15 @@ func (s *Service) GetPostsByCategory(ctx context.Context, categoryID int64) ([]*
 	return s.mergeCategories(ctx, posts)
 }
 
-func (s *Service) CreatePost(ctx context.Context, post *entity.Post) (int64, error) {
+func (s *service) CreatePost(ctx context.Context, post *entity.Post) (int64, error) {
 	return s.postsRepository.CreatePost(ctx, post)
 }
 
-func (s *Service) DeletePost(ctx context.Context, id int64, deleteCategory enum.ReportCategory, deleteMessage string) error {
+func (s *service) DeletePost(ctx context.Context, id int64, deleteCategory enum.ReportCategory, deleteMessage string) error {
 	return s.postsRepository.DeletePost(ctx, id, deleteCategory, deleteMessage)
 }
 
-func (s *Service) mergeCategories(ctx context.Context, posts []*entity.Post) ([]*entity.Post, error) {
+func (s *service) mergeCategories(ctx context.Context, posts []*entity.Post) ([]*entity.Post, error) {
 	postsMap := make(map[int64]*entity.Post, len(posts))
 	postIDs := make([]int64, len(posts))
 	for i, p := range posts {
