@@ -9,3 +9,8 @@ type PostCategories struct {
 	PostID     int64
 	Categories []*Category
 }
+
+type CategoryPosts struct {
+	Category *Category
+	Posts    []*Post
+}

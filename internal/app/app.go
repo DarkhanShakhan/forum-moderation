@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"os"
 
 	_ "github.com/mattn/go-sqlite3"
 
@@ -22,26 +23,35 @@ type Application struct {
 }
 
 func InitApp() *Application {
-	// TODO: read envs
-	// TODO: init repo
 	app := &Application{}
+
 	app.loadConfig()
 	log.Println("loaded config")
+
 	if err := app.initLogger(); err != nil {
-		log.Fatal("init logger:", err)
+		log.Fatal("init logger: ", err)
 	}
 	log.Println("logger initialized")
+
 	if err := app.initDB(); err != nil {
-		log.Fatal("init db:", err)
+		log.Fatal("init db: ", err)
 	}
 	log.Println("db initialized")
+
+	if err := app.mirgateDB(); err != nil {
+		log.Fatal("migrate db: ", err)
+	}
+	log.Println("db migrated succesfully")
+
 	app.initHTTPServer()
 	log.Println("server initialized")
+
 	return app
 }
 
 func (a *Application) initLogger() error {
 	// TODO: init logger
+
 	return nil
 }
 
@@ -55,7 +65,12 @@ func (a *Application) initDB() error {
 }
 
 func (a *Application) mirgateDB() error {
-	return nil
+	stmts, err := os.ReadFile("./migrations/init.sql")
+	if err != nil {
+		return err
+	}
+	_, err = a.db.Exec(string(stmts))
+	return err
 }
 
 func (a *Application) initHTTPServer() {

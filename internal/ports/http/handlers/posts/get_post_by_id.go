@@ -17,6 +17,7 @@ func (c *controller) getPostByIDHandler(w http.ResponseWriter, r *http.Request) 
 	}
 	post, err := c.postsService.GetPostByID(r.Context(), req.ID)
 	if err != nil {
+		util.SendError(w, err, http.StatusNotFound)
 		return
 	}
 	util.SendData(w, http.StatusOK, util.NewSuccessResponse(newPostResponse(post)))
