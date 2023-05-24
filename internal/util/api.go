@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 func GetData(r *http.Request, dst interface{}) error {
@@ -26,6 +28,11 @@ func GetData(r *http.Request, dst interface{}) error {
 		return v.Validate()
 	}
 	return nil
+}
+
+func GetIDFromPath(pattern string, path string) (int64, error) {
+	id, err := strconv.Atoi(strings.TrimPrefix(path, pattern))
+	return int64(id), err
 }
 
 func SendData(w http.ResponseWriter, status int, data any, headers ...http.Header) {
@@ -77,6 +84,12 @@ func NewSuccessResponse(result any) APIResponse {
 	return APIResponse{
 		Status: "success",
 		Result: result,
+	}
+}
+
+func NewEmptySuccessResponse() APIResponse {
+	return APIResponse{
+		Status: "success",
 	}
 }
 

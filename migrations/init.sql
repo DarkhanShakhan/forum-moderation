@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS user_roles (
     name TEXT UNIQUE
 );
 
-INSERT INTO user_roles()
+-- INSERT INTO user_roles()
 
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS categories (
 CREATE TABLE IF NOT EXISTS posts_categories (
     post_id INTEGER NOT NULL,
     category_id INTEGER NOT NULL,
-    UNIQUE(post_id, category_id)
+    UNIQUE(post_id, category_id),
     FOREIGN KEY(post_id) REFERENCES posts(id) ON DELETE CASCADE,
-    FOREIGN KEY(category_id) REFERENCES categories(id) ON DELETE CASCADE,
-)
+    FOREIGN KEY(category_id) REFERENCES categories(id) ON DELETE CASCADE
+);

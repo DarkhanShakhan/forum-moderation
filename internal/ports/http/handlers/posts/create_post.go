@@ -72,7 +72,7 @@ func (r *createPostRequest) Validate() error {
 	if len(r.Content) > 0 && util.IsEmptyString(r.Content) {
 		return errors.New("content with spaces")
 	}
-	if r.AuthorID <= 0 {
+	if !util.IsPositiveNumber(r.AuthorID) {
 		return errors.New("empty author_id")
 	}
 	if util.IsEmptySlice(r.Categories) || !util.IsUniqueSlice(r.Categories) {

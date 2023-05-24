@@ -12,6 +12,7 @@ import (
 	httpServer "github.com/DarkhanShakhan/forum-moderation/internal/ports/http"
 	"github.com/DarkhanShakhan/forum-moderation/internal/repositories/categories"
 	"github.com/DarkhanShakhan/forum-moderation/internal/repositories/posts"
+	categoriesS "github.com/DarkhanShakhan/forum-moderation/internal/services/categories"
 	postsS "github.com/DarkhanShakhan/forum-moderation/internal/services/posts"
 )
 
@@ -77,7 +78,8 @@ func (a *Application) initHTTPServer() {
 	postsRepository := posts.New(a.db)
 	categoriesRepository := categories.New(a.db)
 	postsService := postsS.New(postsRepository, categoriesRepository)
-	a.httpServer = httpServer.NewServer(a.config, postsService)
+	categoriesService := categoriesS.New(categoriesRepository)
+	a.httpServer = httpServer.NewServer(a.config, postsService, categoriesService)
 }
 
 func (a *Application) Start() error {

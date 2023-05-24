@@ -3,8 +3,6 @@ package posts
 import (
 	"errors"
 	"net/http"
-	"strconv"
-	"strings"
 
 	"github.com/DarkhanShakhan/forum-moderation/internal/util"
 )
@@ -28,18 +26,16 @@ type getPostByIDRequest struct {
 }
 
 func (r *getPostByIDRequest) GetParams(req *http.Request) error {
-	//FIXME: regex
-	path := strings.Split(req.URL.Path, "/")
-	id, err := strconv.Atoi(path[len(path)-1])
+	id, err := util.GetIDFromPath(getPostByIDPattern, req.URL.Path)
 	if err != nil {
 		return err
 	}
-	r.ID = int64(id)
+	r.ID = id
 	return nil
 }
 
 func (r *getPostByIDRequest) Validate() error {
-	if r.ID <= 0 {
+	if !util.IsPositiveNumber(r.ID) {
 		return errors.New("id must be positive number")
 	}
 	return nil

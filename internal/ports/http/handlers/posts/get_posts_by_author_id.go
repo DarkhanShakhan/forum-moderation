@@ -36,7 +36,7 @@ func (r *getPostsByAuthorIDRequest) GetParams(req *http.Request) error {
 }
 
 func (r *getPostsByAuthorIDRequest) Validate() error {
-	if r.ID <= 0 {
+	if !util.IsPositiveNumber(r.ID) {
 		return errors.New("id must be positive number")
 	}
 	return nil

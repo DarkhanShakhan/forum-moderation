@@ -7,6 +7,11 @@ import (
 	"github.com/DarkhanShakhan/forum-moderation/internal/services/posts"
 )
 
+const (
+	getPostByIDPattern         = "/api/posts/"
+	getPostByCategoryIDPattern = "/api/posts/categories/"
+)
+
 type controller struct {
 	postsService posts.Service
 	m            middleware.Middleware
@@ -20,9 +25,9 @@ func New(postsService posts.Service, middleware middleware.Middleware) *controll
 }
 
 func (c *controller) Init(mux *http.ServeMux) {
-	mux.HandleFunc("/api/posts/", c.m.GET(c.getPostByIDHandler))
+	mux.HandleFunc("/api/posts/", c.m.GET(c.m.MatchPattern(c.getPostByIDHandler, getPostByIDPattern)))
 	mux.HandleFunc("/api/posts", c.m.GET(c.getPostsHandler))
 	mux.HandleFunc("/api/posts/mine", c.m.GET(c.getPostsByAuthorID))
-	mux.HandleFunc("/api/posts/categories/", c.m.GET(c.getPostsByCategoryID))
+	mux.HandleFunc("/api/posts/categories/", c.m.GET(c.m.MatchPattern(c.getPostsByCategoryID, getPostByCategoryIDPattern)))
 	mux.HandleFunc("/api/posts/new", c.m.POST(c.createPostHandler))
 }

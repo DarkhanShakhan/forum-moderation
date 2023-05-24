@@ -1,9 +1,13 @@
 package middleware
 
-import "net/http"
+import (
+	"net/http"
+	"strings"
+)
 
 type Middleware interface {
 	Auth(next http.HandlerFunc) http.HandlerFunc
+	MatchPattern(next http.HandlerFunc, pattern string) http.HandlerFunc
 	POST(next http.HandlerFunc) http.HandlerFunc
 	GET(next http.HandlerFunc) http.HandlerFunc
 	PUT(next http.HandlerFunc) http.HandlerFunc
@@ -20,6 +24,17 @@ func New() Middleware {
 func (m *middleware) Auth(next http.HandlerFunc) http.HandlerFunc {
 	// TODO: implement
 	return next
+}
+
+func (m *middleware) MatchPattern(next http.HandlerFunc, pattern string) http.HandlerFunc {
+	return http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			if strings.Contains(strings.TrimPrefix(r.URL.Path, pattern), "/") {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
 }
 
 func (m *middleware) POST(next http.HandlerFunc) http.HandlerFunc {

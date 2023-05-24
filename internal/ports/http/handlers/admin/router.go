@@ -8,6 +8,10 @@ import (
 	"github.com/DarkhanShakhan/forum-moderation/internal/services/posts"
 )
 
+const (
+	deleteCategoryPattern = "/api/admin/categories/"
+)
+
 type controller struct {
 	postsService      posts.Service
 	categoriesService categories.Service
@@ -25,4 +29,6 @@ func New(postsService posts.Service, categoriesService categories.Service, middl
 func (c *controller) Init(mux *http.ServeMux) {
 	// TODO: add admin middleware
 	mux.HandleFunc("/api/admin/categories/new", c.m.POST(c.createCategoryHandler))
+	mux.HandleFunc("/api/admin/categories/", c.m.DELETE(
+		c.m.MatchPattern(c.deleteCategoryHandler, deleteCategoryPattern)))
 }
