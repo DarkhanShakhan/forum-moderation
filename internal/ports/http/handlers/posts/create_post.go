@@ -18,9 +18,10 @@ func (c *controller) createPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	id, err := c.postsService.CreatePost(r.Context(), req.convertToPost())
 	if err != nil {
+		//FIXME:
 		return
 	}
-	util.SendData(w, http.StatusOK, util.NewSuccessResponse(
+	util.SendData(w, http.StatusCreated, util.NewSuccessResponse(
 		struct {
 			ID int64 `json:"id"`
 		}{ID: id},
