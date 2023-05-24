@@ -14,11 +14,15 @@ func (c *controller) getPostsByCategoryID(w http.ResponseWriter, r *http.Request
 		util.SendError(w, err, http.StatusBadRequest)
 		return
 	}
-	posts, err := c.postsService.GetPostsByCategory(r.Context(), req.ID)
+
+	postsByCat, err := c.postsService.GetPostsByCategory(r.Context(), req.ID)
 	if err != nil {
 		return
 	}
-	util.SendData(w, http.StatusOK, util.NewSuccessResponse(newPostsResponse(posts)))
+	util.SendData(w, http.StatusOK, util.NewSuccessResponse(getPostsByCategoryResponse{
+		Category: newCategoryResponse(postsByCat.Category),
+		Posts:    newPostsResponse(postsByCat.Posts),
+	}))
 }
 
 type getPostsByCategoryIDRequest struct {
@@ -34,4 +38,9 @@ func (r *getPostsByCategoryIDRequest) GetParams(req *http.Request) error {
 	}
 	r.ID = int64(id)
 	return nil
+}
+
+type getPostsByCategoryResponse struct {
+	Category *categoryResponse `json:"category"`
+	Posts    []*postResponse   `json:"posts"`
 }

@@ -5,6 +5,7 @@ import (
 
 	"github.com/DarkhanShakhan/forum-moderation/internal/domain/entity"
 	"github.com/DarkhanShakhan/forum-moderation/internal/domain/enum"
+	"github.com/DarkhanShakhan/forum-moderation/internal/errors"
 	"github.com/DarkhanShakhan/forum-moderation/internal/repositories/categories"
 	"github.com/DarkhanShakhan/forum-moderation/internal/repositories/posts"
 	errgroup "github.com/DarkhanShakhan/forum-moderation/internal/util"
@@ -14,7 +15,7 @@ type Service interface {
 	GetPostByID(ctx context.Context, id int64) (*entity.Post, error)
 	GetPosts(ctx context.Context) ([]*entity.Post, error)
 	GetPostsByAuthorID(ctx context.Context, authorID int64) ([]*entity.Post, error)
-	GetPostsByCategory(ctx context.Context, categoryID int64) ([]*entity.Post, error)
+	GetPostsByCategory(ctx context.Context, categoryID int64) (*entity.CategoryPosts, error)
 	CreatePost(ctx context.Context, post *entity.Post) (int64, error)
 	DeletePost(ctx context.Context, id int64, deleteCategory enum.ReportCategory, deleteMessage string) error
 }
@@ -71,12 +72,23 @@ func (s *service) GetPostsByAuthorID(ctx context.Context, authorID int64) ([]*en
 	return s.mergeCategories(ctx, posts)
 }
 
-func (s *service) GetPostsByCategory(ctx context.Context, categoryID int64) ([]*entity.Post, error) {
+func (s *service) GetPostsByCategory(ctx context.Context, categoryID int64) (*entity.CategoryPosts, error) {
+	category, err := s.categoriesRepository.GetCategoryByID(ctx, categoryID)
+	if err != nil {
+		return nil, errors.ErrCategoryNotFound
+	}
 	posts, err := s.postsRepository.GetPostsByCategory(ctx, categoryID)
 	if err != nil {
 		return nil, err
 	}
-	return s.mergeCategories(ctx, posts)
+	posts, err = s.mergeCategories(ctx, posts)
+	if err != nil {
+		return nil, err
+	}
+	return &entity.CategoryPosts{
+		Category: category,
+		Posts:    posts,
+	}, nil
 }
 
 func (s *service) CreatePost(ctx context.Context, post *entity.Post) (int64, error) {
