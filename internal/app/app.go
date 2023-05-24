@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	_ "github.com/mattn/go-sqlite3"
+
 	"github.com/DarkhanShakhan/forum-moderation/internal/config"
 	httpServer "github.com/DarkhanShakhan/forum-moderation/internal/ports/http"
 	"github.com/DarkhanShakhan/forum-moderation/internal/repositories/categories"
@@ -24,13 +26,17 @@ func InitApp() *Application {
 	// TODO: init repo
 	app := &Application{}
 	app.loadConfig()
+	log.Println("loaded config")
 	if err := app.initLogger(); err != nil {
 		log.Fatal("init logger:", err)
 	}
+	log.Println("logger initialized")
 	if err := app.initDB(); err != nil {
 		log.Fatal("init db:", err)
 	}
+	log.Println("db initialized")
 	app.initHTTPServer()
+	log.Println("server initialized")
 	return app
 }
 
@@ -40,7 +46,15 @@ func (a *Application) initLogger() error {
 }
 
 func (a *Application) initDB() error {
-	// TODO: init DB
+	var err error
+	a.db, err = sql.Open("sqlite3", a.config.SqliteDBName)
+	if err != nil {
+		return err
+	}
+	return a.db.Ping()
+}
+
+func (a *Application) mirgateDB() error {
 	return nil
 }
 
@@ -52,9 +66,13 @@ func (a *Application) initHTTPServer() {
 }
 
 func (a *Application) Start() error {
+	log.Printf("server is starting on %s\n", a.httpServer.Addr)
 	return a.httpServer.ListenAndServe()
 }
 
+func (a *Application) CloseDB() error {
+	return a.db.Close()
+}
 func (a *Application) loadConfig() {
 	a.config = config.LoadConfig()
 }
