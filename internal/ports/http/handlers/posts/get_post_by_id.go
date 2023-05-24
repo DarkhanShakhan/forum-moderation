@@ -27,6 +27,7 @@ type getPostByIDRequest struct {
 }
 
 func (r *getPostByIDRequest) GetParams(req *http.Request) error {
+	//FIXME: regex
 	path := strings.Split(req.URL.Path, "/")
 	id, err := strconv.Atoi(path[len(path)-1])
 	if err != nil {

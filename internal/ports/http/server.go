@@ -19,7 +19,8 @@ func NewServer(config *config.Config, postsService posts.Service) *http.Server {
 	}
 	// TODO: add more configs
 	return &http.Server{
-		Addr: config.HTTPAddress,
+		Addr:    config.HTTPAddress,
+		Handler: mux,
 	}
 }
 
