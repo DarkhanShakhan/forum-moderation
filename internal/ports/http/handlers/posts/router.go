@@ -20,6 +20,9 @@ func New(postsService posts.Service, middleware middleware.Middleware) *controll
 }
 
 func (c *controller) Init(mux *http.ServeMux) {
-	mux.HandleFunc("/posts/", c.m.GET(c.getPostByIDHandler))
-	mux.HandleFunc("/posts", c.m.GET(c.getPostsHandler))
+	mux.HandleFunc("/api/posts/", c.m.GET(c.getPostByIDHandler))
+	mux.HandleFunc("/api/posts", c.m.GET(c.getPostsHandler))
+	mux.HandleFunc("/api/posts/mine", c.m.GET(c.getPostsByAuthorID))
+	mux.HandleFunc("/api/posts/categories/", c.m.GET(c.getPostsByCategoryID))
+	mux.HandleFunc("/api/posts/new", c.m.POST(c.createPostHandler))
 }
