@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/DarkhanShakhan/forum-moderation/internal/ports/http/middleware"
+	"github.com/DarkhanShakhan/forum-moderation/internal/services/comments"
 	"github.com/DarkhanShakhan/forum-moderation/internal/services/posts"
 )
 
@@ -13,14 +14,16 @@ const (
 )
 
 type controller struct {
-	postsService posts.Service
-	m            middleware.Middleware
+	postsService    posts.Service
+	commentsService comments.Service
+	m               middleware.Middleware
 }
 
-func New(postsService posts.Service, middleware middleware.Middleware) *controller {
+func New(postsService posts.Service, commentsService comments.Service, middleware middleware.Middleware) *controller {
 	return &controller{
-		postsService: postsService,
-		m:            middleware,
+		postsService:    postsService,
+		commentsService: commentsService,
+		m:               middleware,
 	}
 }
 

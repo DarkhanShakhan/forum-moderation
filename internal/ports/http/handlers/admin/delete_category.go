@@ -4,6 +4,8 @@ import (
 	"errors"
 	"net/http"
 
+	appErr "github.com/DarkhanShakhan/forum-moderation/internal/errors"
+
 	"github.com/DarkhanShakhan/forum-moderation/internal/util"
 )
 
@@ -15,10 +17,14 @@ func (c *controller) deleteCategoryHandler(w http.ResponseWriter, r *http.Reques
 	}
 	err := c.categoriesService.DeleteCategory(r.Context(), req.ID)
 	if err != nil {
-		//FIXME:
+		if errors.Is(err, appErr.ErrCategoryNotFound) {
+			util.SendError(w, err, http.StatusNotFound)
+			return
+		}
+		util.SendError(w, err, http.StatusInternalServerError)
 		return
 	}
-	util.SendData(w, http.StatusOK, util.NewEmptySuccessResponse())
+	w.WriteHeader(http.StatusNoContent)
 }
 
 type deleteCategoryRequest struct {

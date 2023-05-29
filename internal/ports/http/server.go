@@ -5,18 +5,21 @@ import (
 
 	"github.com/DarkhanShakhan/forum-moderation/internal/config"
 	"github.com/DarkhanShakhan/forum-moderation/internal/ports/http/handlers/admin"
+	commentsC "github.com/DarkhanShakhan/forum-moderation/internal/ports/http/handlers/comments"
 	postsC "github.com/DarkhanShakhan/forum-moderation/internal/ports/http/handlers/posts"
 	"github.com/DarkhanShakhan/forum-moderation/internal/ports/http/middleware"
 	"github.com/DarkhanShakhan/forum-moderation/internal/services/categories"
+	"github.com/DarkhanShakhan/forum-moderation/internal/services/comments"
 	"github.com/DarkhanShakhan/forum-moderation/internal/services/posts"
 )
 
-func NewServer(config *config.Config, postsService posts.Service, categoriesService categories.Service) *http.Server {
+func NewServer(config *config.Config, postsService posts.Service, categoriesService categories.Service, commentsService comments.Service) *http.Server {
 	mux := http.NewServeMux()
 	m := middleware.New()
 	for _, ctrl := range []Controller{
-		postsC.New(postsService, m),
-		admin.New(postsService, categoriesService, m),
+		postsC.New(postsService, commentsService, m),
+		admin.New(postsService, categoriesService, commentsService, m),
+		commentsC.New(commentsService, m),
 	} {
 		ctrl.Init(mux)
 	}

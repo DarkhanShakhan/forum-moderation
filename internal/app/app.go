@@ -10,6 +10,9 @@ import (
 
 	"github.com/DarkhanShakhan/forum-moderation/internal/config"
 	httpServer "github.com/DarkhanShakhan/forum-moderation/internal/ports/http"
+	"github.com/DarkhanShakhan/forum-moderation/internal/repositories/comments"
+	commentsS "github.com/DarkhanShakhan/forum-moderation/internal/services/comments"
+
 	"github.com/DarkhanShakhan/forum-moderation/internal/repositories/categories"
 	"github.com/DarkhanShakhan/forum-moderation/internal/repositories/posts"
 	categoriesS "github.com/DarkhanShakhan/forum-moderation/internal/services/categories"
@@ -77,9 +80,11 @@ func (a *Application) mirgateDB() error {
 func (a *Application) initHTTPServer() {
 	postsRepository := posts.New(a.db)
 	categoriesRepository := categories.New(a.db)
+	commentsRepository := comments.New(a.db)
 	postsService := postsS.New(postsRepository, categoriesRepository)
 	categoriesService := categoriesS.New(categoriesRepository)
-	a.httpServer = httpServer.NewServer(a.config, postsService, categoriesService)
+	commentsService := commentsS.New(commentsRepository)
+	a.httpServer = httpServer.NewServer(a.config, postsService, categoriesService, commentsService)
 }
 
 func (a *Application) Start() error {

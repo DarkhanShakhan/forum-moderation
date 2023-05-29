@@ -16,7 +16,7 @@ type Service interface {
 	GetPostsByAuthorID(ctx context.Context, authorID int64) ([]*entity.Post, error)
 	GetPostsByCategory(ctx context.Context, categoryID int64) ([]*entity.Post, error)
 	CreatePost(ctx context.Context, post *entity.Post) (int64, error)
-	DeletePost(ctx context.Context, id int64, deleteCategory enum.ReportCategory, deleteMessage string) error
+	DeletePost(ctx context.Context, id, deletedBy int64, deleteCategory enum.ReportCategory, deleteMessage string) error
 }
 
 type service struct {
@@ -88,8 +88,8 @@ func (s *service) CreatePost(ctx context.Context, post *entity.Post) (int64, err
 	return s.postsRepository.CreatePost(ctx, post)
 }
 
-func (s *service) DeletePost(ctx context.Context, id int64, deleteCategory enum.ReportCategory, deleteMessage string) error {
-	return s.postsRepository.DeletePost(ctx, id, deleteCategory, deleteMessage)
+func (s *service) DeletePost(ctx context.Context, id, deletedBy int64, deleteCategory enum.ReportCategory, deleteMessage string) error {
+	return s.postsRepository.DeletePost(ctx, id, deletedBy, deleteCategory, deleteMessage)
 }
 
 func (s *service) mergeCategories(ctx context.Context, posts []*entity.Post) ([]*entity.Post, error) {

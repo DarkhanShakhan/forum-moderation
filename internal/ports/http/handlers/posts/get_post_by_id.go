@@ -13,12 +13,19 @@ func (c *controller) getPostByIDHandler(w http.ResponseWriter, r *http.Request) 
 	if err := util.GetData(r, &req); err != nil {
 		return
 	}
-	post, err := c.postsService.GetPostByID(r.Context(), req.ID)
+	ctx := r.Context()
+	post, err := c.postsService.GetPostByID(ctx, req.ID)
 	if err != nil {
-		util.SendError(w, err, http.StatusNotFound)
+		util.SendError(w, err, http.StatusNotFound) //FIXME: check for error
 		return
 	}
-	util.SendData(w, http.StatusOK, util.NewSuccessResponse(newPostResponse(post)))
+	// TODO: async
+	comments, err := c.commentsService.GetCommentsByPostID(ctx, post.ID)
+	if err != nil {
+		util.SendError(w, err, http.StatusInternalServerError)
+		return
+	}
+	util.SendData(w, http.StatusOK, util.NewSuccessResponse(newPostResponse(post, comments)))
 }
 
 type getPostByIDRequest struct {

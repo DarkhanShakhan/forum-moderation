@@ -11,10 +11,10 @@ import (
 )
 
 type Repository interface {
-	CreateComment(ctx context.Context, comment entity.Comment) (int64, error)
+	CreateComment(ctx context.Context, comment *entity.Comment) (int64, error)
 	GetCommentsByPostID(ctx context.Context, postID int64) ([]*entity.Comment, error)
-	DeleteCommentByID(ctx context.Context, id int64, deleteCategory enum.ReportCategory, deleteMessage string) error
-	SetVisible(ctx context.Context, id uint64, visible bool) error
+	DeleteCommentByID(ctx context.Context, id int64, deleteCategory enum.ReportCategory, deleteMessage *string) error
+	SetVisible(ctx context.Context, id int64, visible bool) error
 }
 
 type repository struct {
@@ -25,7 +25,7 @@ func New(db *sql.DB) Repository {
 	return &repository{db: db}
 }
 
-func (r *repository) CreateComment(ctx context.Context, comment entity.Comment) (int64, error) {
+func (r *repository) CreateComment(ctx context.Context, comment *entity.Comment) (int64, error) {
 	res, err := r.db.ExecContext(ctx, createCommentStmt, comment.PostID, comment.AuthorID, comment.Content, time.Now())
 	if err != nil {
 		return 0, err
@@ -50,7 +50,7 @@ func (r *repository) GetCommentsByPostID(ctx context.Context, postID int64) ([]*
 	return mm.convert(), nil
 }
 
-func (r *repository) DeleteCommentByID(ctx context.Context, id int64, deleteCategory enum.ReportCategory, deleteMessage string) error {
+func (r *repository) DeleteCommentByID(ctx context.Context, id int64, deleteCategory enum.ReportCategory, deleteMessage *string) error {
 	res, err := r.db.ExecContext(ctx, deleteCommentStmt, time.Now(), deleteMessage, deleteCategory, id)
 	if err != nil {
 		return err
@@ -65,7 +65,7 @@ func (r *repository) DeleteCommentByID(ctx context.Context, id int64, deleteCate
 	return nil
 }
 
-func (r *repository) SetVisible(ctx context.Context, id uint64, visible bool) error {
+func (r *repository) SetVisible(ctx context.Context, id int64, visible bool) error {
 	res, err := r.db.ExecContext(ctx, setVisibleStmt, visible, id)
 	if err != nil {
 		return err

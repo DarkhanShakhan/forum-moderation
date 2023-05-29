@@ -17,7 +17,7 @@ type Repository interface {
 	GetPostsByAuthorID(ctx context.Context, authorID int64) ([]*entity.Post, error)
 	CreatePost(ctx context.Context, post *entity.Post) (int64, error)
 	UpdatePost(ctx context.Context, post *entity.Post) error
-	DeletePost(ctx context.Context, id int64, deleteCategory enum.ReportCategory, deleteMessage string) error
+	DeletePost(ctx context.Context, id, deletedBy int64, deleteCategory enum.ReportCategory, deleteMessage string) error
 }
 
 type repository struct {
@@ -104,7 +104,7 @@ func (r *repository) UpdatePost(ctx context.Context, post *entity.Post) error {
 	return nil
 }
 
-func (r *repository) DeletePost(ctx context.Context, id int64, deleteCategory enum.ReportCategory, deleteMessage string) error {
+func (r *repository) DeletePost(ctx context.Context, id, deletedBy int64, deleteCategory enum.ReportCategory, deleteMessage string) error {
 	res, err := r.db.ExecContext(ctx, deletePostStmt, time.Now(), deleteMessage, deleteCategory, id)
 	if err != nil {
 		return err
