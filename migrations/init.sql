@@ -88,9 +88,6 @@ CREATE TABLE IF NOT EXISTS posts (
     deleted_at TEXT,
     deleted_by INTEGER,
     delete_message TEXT,
-    reported_at TEXT,
-    reported_by INTEGER,
-    report_message TEXT,
     moderator_viewed INTEGER NOT NULL DEFAULT 0,
     moderator_viewed_by INTEGER,
     FOREIGN KEY(author_id) REFERENCES users(id) ON DELETE CASCADE
@@ -104,10 +101,46 @@ CREATE TABLE IF NOT EXISTS posts_tags (
     FOREIGN KEY(tag_id) REFERENCES tags(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS reports (
+CREATE TABLE IF NOT EXISTS posts_reports (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     reported_by INTEGER NOT NULL,
     post_id INTEGER NOT NULL,
+    created_at TEXT NOT NULL,
+    message TEXT,
+    admin_viewed INTEGER NOT NULL DEFAULT 0,
+    admin_viewed_by INTEGER
+    deleted_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS comments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id INTEGER,
+    author_id INTEGER,
+    content TEXT,
+    visible INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    deleted_at TEXT,
+    delete_message TEXT,
+    moderator_viewed INTEGER NOT NULL DEFAULT 0,
+    moderator_viewed_by INTEGER,
+    FOREIGN KEY(author_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY(post_id) REFERENCES posts(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS comments_reactions (
+    comment_id INTEGER,
+    user_id INTEGER,
+    reaction INTEGER,
+    created_at TEXT,
+    UNIQUE(comment_id, user_id),
+    FOREIGN KEY(comment_id) REFERENCES comments(id) ON DELETE CASCADE,
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS comments_reports (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    reported_by INTEGER NOT NULL,
+    comment_id INTEGER NOT NULL,
     created_at TEXT NOT NULL,
     message TEXT,
     admin_viewed INTEGER NOT NULL DEFAULT 0,

@@ -1,10 +1,10 @@
 package entity
 
 type Comment struct {
-	ID            string
-	PostID        string
-	AuthorID      string
+	ID            int64
+	PostID        int64
+	AuthorID      int64
 	Content       string
-	LikesCount    uint64
-	DislikesCount uint64
+	LikesCount    int64
+	DislikesCount int64
 }

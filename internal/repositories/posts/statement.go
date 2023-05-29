@@ -23,7 +23,7 @@ const (
 					LEFT JOIN posts_reactions r ON p.id=r.post_id
 					WHERE p.visible = true AND p.deleted_at = NULL
 					GROUP BY p.id, p.title, p.content, p.author_id
-					ORDER BY p.created_at DESC`
+					ORDER BY p.created_at DESC;`
 	getPostsByCategoryStmt = `SELECT
 								p.id,
 								p.title,
@@ -39,7 +39,7 @@ const (
 								WHERE category_id = ?
 							) AND p.visible = true AND p.deleted_at = NULL
 							GROUP BY p.id, p.title, p.content, p.author_id
-							ORDER BY p.created_at DESC`
+							ORDER BY p.created_at DESC;`
 	getPostsByAuthorIDStmt = `SELECT
 							p.id,
 							p.title,
@@ -53,8 +53,8 @@ const (
 						GROUP BY p.id, p.title, p.content, p.author_id
 						ORDER BY p.created_at DESC`
 	createPostStmt = `INSERT INTO posts(title, content, author_id, created_at)
-						VALUES (?, ?, ?, ?)
+						VALUES (?, ?, ?, ?);
 						`
-	setVisibleStmt = `UPDATE posts SET visible = ? WHERE id = ?`
-	deletePostStmt = `UPDATE posts SET deleted_at = ?, deleted_by = ?, delete_message=?, delete_category=? WHERE id = ?`
+	setVisibleStmt = `UPDATE posts SET visible = ? WHERE id = ?;`
+	deletePostStmt = `UPDATE posts SET deleted_at = ?, deleted_by = ?, delete_message=?, delete_category=? WHERE id = ?;`
 )
