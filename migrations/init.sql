@@ -127,11 +127,10 @@ CREATE TABLE IF NOT EXISTS comments (
     FOREIGN KEY(post_id) REFERENCES posts(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS comments_reactions (
+CREATE TABLE IF NOT EXISTS comment_reactions (
     comment_id INTEGER,
     user_id INTEGER,
     reaction INTEGER,
-    created_at TEXT,
     UNIQUE(comment_id, user_id),
     FOREIGN KEY(comment_id) REFERENCES comments(id) ON DELETE CASCADE,
     FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -146,4 +145,13 @@ CREATE TABLE IF NOT EXISTS comments_reports (
     admin_viewed INTEGER NOT NULL DEFAULT 0,
     admin_viewed_by INTEGER
     deleted_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS post_reactions (
+    post_id INTEGER,
+    user_id INTEGER,
+    reaction INTEGER,
+    UNIQUE(post_id, user_id),
+    FOREIGN KEY(post_id) REFERENCES posts(id) ON DELETE CASCADE,
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
